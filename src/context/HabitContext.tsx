@@ -51,7 +51,7 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
 
     if (current === undefined) nextStatus = 'success';
     else if (current === 'success') nextStatus = 'failed';
-    else nextStatus = undefined;
+    else nextStatus = 'success';
 
     const next = await updateDayStatus(dateKey, nextStatus);
     setData(next);
