@@ -72,3 +72,43 @@ export async function updateDayStatus(
   await saveAppData(updated);
   return updated;
 }
+
+// ============================
+// | TESTING FUNCTIONS BELOW  |
+// ============================
+
+export async function updateStartDate(newDate: string): Promise<AppData> {
+  console.log(`Updating start date to: ${newDate}`);
+  // 1. Get the entire AppData object
+  const data = await loadAppData();
+
+  // 2. Safety check: ensure activeHabit exists
+  if (!data.activeHabit) {
+    console.warn("No active habit found to update.");
+    return data;
+  }
+
+  // 3. Create a new object with the updated startDate
+  const updated: AppData = {
+    ...data,
+    activeHabit: {
+      ...data.activeHabit,
+      startDate: newDate,
+    },
+  };
+
+  // 4. Save the full object back to the STORAGE_KEY
+  await saveAppData(updated);
+
+  return updated;
+}
+
+export const viewStorage = async () => {
+  try {
+    const keys = await AsyncStorage.getAllKeys();
+    const result = await AsyncStorage.multiGet(keys);
+    console.table(result); // This displays your storage formatted as a neat table in DevTools!
+  } catch (error) {
+    console.error("Error loading AsyncStorage keys", error);
+  }
+};
