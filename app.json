@@ -7,7 +7,12 @@
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "dark",
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.anonymous.betterme",
+      "userInterfaceStyle": "automatic",
+      "entitlements": {
+        "com.apple.security.app-sandbox": false
+      }
     },
     "android": {
       "adaptiveIcon": {
