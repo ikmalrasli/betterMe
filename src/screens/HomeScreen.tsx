@@ -73,9 +73,11 @@ export default function HomeScreen() {
   const winRate = calculateWinRate(habit.history);
   const currentStreak = calculateCurrentStreak(habit.history);
 
-  const handleDayPress = async (dateKey: string | null) => {
-    if (!dateKey || dateKey !== today) return;
+  const isEditableDay = (dateKey: string) =>
+    dateKey >= habit.startDate && dateKey <= today;
 
+  const handleDayPress = async (dateKey: string | null) => {
+    if (!dateKey || !isEditableDay(dateKey)) return;
     const current = habit.history[dateKey];
     await toggleToday(dateKey);
 
@@ -107,15 +109,16 @@ export default function HomeScreen() {
             }
 
             const isToday = cell.dateKey === today;
+            const isEditable = isEditableDay(cell.dateKey!);
             const status = habit.history[cell.dateKey!];
             const cellStyle = getCellStyle(status, isToday);
 
             return (
               <Pressable
                 key={cell.dateKey!}
-                style={[styles.cell, cellStyle]}
+                style={[styles.cell, cellStyle, !isEditable && styles.cellDisabled]}
                 onPress={() => handleDayPress(cell.dateKey)}
-                disabled={!isToday}
+                disabled={!isEditable}
               >
                 <Text
                   style={[
@@ -132,7 +135,7 @@ export default function HomeScreen() {
           })}
         </View>
 
-        <Text style={styles.tapHint}>Tap today to mark success or failure</Text>
+        <Text style={styles.tapHint}>Tap a day to mark success or failure</Text>
 
         <View style={styles.statsRow}>
           <View style={styles.statCard}>
@@ -201,6 +204,9 @@ const styles = StyleSheet.create({
   cellEmpty: {
     width: '14.28%',
     aspectRatio: 1,
+  },
+  cellDisabled: {
+    opacity: 0.4,
   },
   cellText: {
     color: colors.textMuted,
