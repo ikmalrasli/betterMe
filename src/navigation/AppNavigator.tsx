@@ -5,10 +5,12 @@ import { colors } from '../constants/theme';
 import { useHabit } from '../context/HabitContext';
 import HomeScreen from '../screens/HomeScreen';
 import OnboardingScreen from '../screens/OnboardingScreen';
+import StatsScreen from '../screens/StatsScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 
 export type RootTabParamList = {
   Home: undefined;
+  Stats: undefined;
   Settings: undefined;
 };
 
@@ -37,6 +39,11 @@ function MainTabs() {
         name="Home"
         component={HomeScreen}
         options={{ tabBarLabel: 'Home' }}
+      />
+      <Tab.Screen
+        name="Stats"
+        component={StatsScreen}
+        options={{ tabBarLabel: 'Stats' }}
       />
       <Tab.Screen
         name="Settings"
