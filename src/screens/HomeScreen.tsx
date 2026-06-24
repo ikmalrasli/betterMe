@@ -112,7 +112,8 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.safe} edges={['top']}>
       <View style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.identity}>{formatIdentity(habit.name)}</Text>
+          <Text style={styles.identity}>{formatIdentity(habit.identity)}</Text>
+          <Text style={styles.habitLabel}>{habit.name}</Text>
           <Text style={styles.monthLabel}>{monthLabel}</Text>
         </View>
 
@@ -208,9 +209,17 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     lineHeight: 34,
   },
+  habitLabel: {
+    color: colors.textMuted,
+    fontSize: 15,
+    fontWeight: '600',
+    letterSpacing: 1,
+    textTransform: 'uppercase',
+  },
   monthLabel: {
     color: colors.textMuted,
     fontSize: 15,
+    textTransform: 'uppercase',
   },
   weekdayRow: {
     flexDirection: 'row',
