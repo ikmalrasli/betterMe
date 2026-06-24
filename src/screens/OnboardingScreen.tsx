@@ -15,6 +15,7 @@ import { HabitType } from '../types';
 
 export default function OnboardingScreen() {
   const { startHabit } = useHabit();
+  const [identity, setIdentity] = useState('');
   const [name, setName] = useState('');
   const [type, setType] = useState<HabitType>('positive');
 
@@ -22,7 +23,7 @@ export default function OnboardingScreen() {
 
   const handleStart = async () => {
     if (!canSubmit) return;
-    await startHabit(name, type);
+    await startHabit(identity, name, type);
   };
 
   return (
@@ -34,18 +35,15 @@ export default function OnboardingScreen() {
         <View style={styles.header}>
           <Text style={styles.brand}>betterME</Text>
           <Text style={styles.question}>Who do you want to become?</Text>
-          <Text style={styles.subtitle}>
-            One identity. One habit. Total focus.
-          </Text>
         </View>
 
         <TextInput
           style={styles.input}
-          placeholder="e.g. A Reader, A Runner, A Non-Smoker"
+            placeholder="e.g. a Reader, a Non-Smoker"
           placeholderTextColor={colors.textDim}
-          value={name}
-          onChangeText={setName}
-          autoCapitalize="words"
+          value={identity}
+          onChangeText={setIdentity}
+          autoCapitalize="none"
           autoCorrect={false}
           returnKeyType="done"
         />
@@ -83,6 +81,17 @@ export default function OnboardingScreen() {
           </Pressable>
         </View>
 
+        <Text style={styles.sectionLabel}>Habit {type === 'positive' ? 'Building' : 'Breaking'} Name</Text>
+        <TextInput
+          style={styles.input}
+          placeholder={type === 'positive' ? 'e.g. Read 20 pages, Exercise' : 'e.g. No smoking, No alcohol'}
+          placeholderTextColor={colors.textDim}
+          value={name}
+          onChangeText={setName}
+          autoCapitalize="words"
+          autoCorrect={false}
+          returnKeyType="done"
+        />
         <Pressable
           style={[styles.startButton, !canSubmit && styles.startButtonDisabled]}
           onPress={handleStart}
@@ -108,7 +117,7 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: spacing.sm,
-    marginBottom: spacing.md,
+    marginBottom: spacing.sm,
   },
   brand: {
     color: colors.accent,
