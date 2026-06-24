@@ -17,7 +17,7 @@ import { AppData, DayStatus, HabitType } from '../types';
 interface HabitContextValue {
   data: AppData;
   isLoading: boolean;
-  startHabit: (name: string, type: HabitType) => Promise<void>;
+  startHabit: (identity: string, name: string, type: HabitType) => Promise<void>;
   clearHabit: () => Promise<void>;
   toggleToday: (dateKey: string) => Promise<void>;
 }
@@ -34,8 +34,8 @@ export function HabitProvider({ children }: { children: React.ReactNode }) {
       .finally(() => setIsLoading(false));
   }, []);
 
-  const startHabit = useCallback(async (name: string, type: HabitType) => {
-    const next = await createHabit(name, type);
+  const startHabit = useCallback(async (identity: string, name: string, type: HabitType) => {
+    const next = await createHabit(identity, name, type);
     setData(next);
   }, []);
 

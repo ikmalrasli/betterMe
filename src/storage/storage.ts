@@ -24,11 +24,13 @@ export async function saveAppData(data: AppData): Promise<void> {
 }
 
 export async function createHabit(
+  identity: string,
   name: string,
   type: ActiveHabit['type']
 ): Promise<AppData> {
   const data: AppData = {
     activeHabit: {
+      identity,
       name: name.trim(),
       type,
       startDate: todayKey(),
