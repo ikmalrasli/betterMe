@@ -9,7 +9,13 @@ export interface ActiveHabit {
   history: Record<string, DayStatus>;
 }
 
+export interface AppSettings {
+  theme: 'light' | 'dark';
+  firstDayOfWeek: 'sunday' | 'monday';
+}
+
 export interface AppData {
   activeHabit: ActiveHabit | null;
   archive: [];
+  settings: AppSettings;
 }
