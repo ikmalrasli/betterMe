@@ -78,7 +78,9 @@ export async function updateDayStatus(
 // ============================
 // | TESTING FUNCTIONS BELOW  |
 // ============================
+// These functions are primarily for testing and debugging purposes. They allow you to view the current state of AsyncStorage and update the start date of the active habit.
 
+// Updates the start date of the active habit (Use date format YYYY-MM-DD)
 export async function updateStartDate(newDate: string): Promise<AppData> {
   console.log(`Updating start date to: ${newDate}`);
   // 1. Get the entire AppData object
