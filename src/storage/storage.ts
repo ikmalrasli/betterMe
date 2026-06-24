@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { ActiveHabit, AppData } from '../types';
+import { ActiveHabit, AppData, AppSettings } from '../types';
 import { todayKey } from '../utils/date';
 
 const STORAGE_KEY = '@the_one_thing_storage';
@@ -7,6 +7,10 @@ const STORAGE_KEY = '@the_one_thing_storage';
 const EMPTY_DATA: AppData = {
   activeHabit: null,
   archive: [],
+  settings: {
+    theme: 'dark',
+    firstDayOfWeek: 'sunday',
+  },
 };
 
 export async function loadAppData(): Promise<AppData> {
@@ -23,6 +27,23 @@ export async function saveAppData(data: AppData): Promise<void> {
   await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(data));
 }
 
+export async function updateSetting<K extends keyof AppSettings>(key: K, value: AppSettings[K]): Promise<AppData> {
+  // Step 1: Load the current data
+  const data = await loadAppData();
+
+  // Step 2: Update only the specific setting requested
+  if (!data.settings) {
+    data.settings = {} as AppSettings; // Initialize settings object if not already present
+  }
+
+  (data.settings as any)[key] = value; // Type assertion to bypass TS type checking for assignment
+
+  // Step 3: Save the updated data back to AsyncStorage
+  await saveAppData(data);
+
+  return data; // Return the updated data structure
+}
+
 export async function createHabit(
   identity: string,
   name: string,
@@ -37,6 +58,10 @@ export async function createHabit(
       history: {},
     },
     archive: [],
+    settings: {
+      theme: 'dark',
+      firstDayOfWeek: 'sunday',
+    },
   };
 
   await saveAppData(data);
