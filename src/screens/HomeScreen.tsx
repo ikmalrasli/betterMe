@@ -58,17 +58,38 @@ export default function HomeScreen() {
     const startOffset = getMonthStartDayIndex(year, month);
     const cells: Array<{ day: number | null; dateKey: string | null }> = [];
 
+    // Fill in the blank days at the start of the month to align the first day correctly
     for (let i = 0; i < startOffset; i++) {
       cells.push({ day: null, dateKey: null });
     }
 
+    // Fill in the actual days of the month
     for (let day = 1; day <= daysInMonth; day++) {
       const date = new Date(year, month, day);
       cells.push({ day, dateKey: formatDateKey(date) });
     }
 
+    // Fill in the blank days at the end of the month to complete the last week
+    // This prevents the final row from stretching cells and ruining the square aspect ratio.
+    const remainder = cells.length % 7;
+    if (remainder !== 0) {
+      const paddingNeeded = 7 - remainder;
+      for (let i = 0; i < paddingNeeded; i++) {
+        cells.push({ day: null, dateKey: null });
+      }
+    }
+
     return cells;
   }, [year, month]);
+
+  // Chunk our linear array (calendarCells) into arrays of 7 days (per week) for rendering
+  const weeks = useMemo(() => {
+    const chunked = [];
+    for (let i = 0; i < calendarCells.length; i += 7) {
+      chunked.push(calendarCells.slice(i, i + 7));
+    }
+    return chunked;
+  }, [calendarCells]);
 
   const winRate = calculateWinRate(habit.history);
   const currentStreak = calculateCurrentStreak(habit.history);
@@ -78,6 +99,7 @@ export default function HomeScreen() {
 
   const handleDayPress = async (dateKey: string | null) => {
     if (!dateKey || !isEditableDay(dateKey)) return;
+
     const current = habit.history[dateKey];
     await toggleToday(dateKey);
 
@@ -103,36 +125,49 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.calendar}>
-          {calendarCells.map((cell, index) => {
-            if (cell.day === null) {
-              return <View key={`empty-${index}`} style={styles.cellEmpty} />;
-            }
+          {weeks.map((week, weekIndex) => (
+            <View key={`week-${weekIndex}`} style={styles.weekRow}>
+              {week.map((cell, cellIndex) => {
+                if (cell.day === null) {
+                  return (
+                    <View
+                      key={`empty-${weekIndex}-${cellIndex}`}
+                      style={styles.cellEmpty}
+                    />
+                  );
+                }
 
-            const isToday = cell.dateKey === today;
-            const isEditable = isEditableDay(cell.dateKey!);
-            const status = habit.history[cell.dateKey!];
-            const cellStyle = getCellStyle(status, isToday);
+                const isToday = cell.dateKey === today;
+                const isEditable = isEditableDay(cell.dateKey!);
+                const status = habit.history[cell.dateKey!];
+                const cellStyle = getCellStyle(status, isToday);
 
-            return (
-              <Pressable
-                key={cell.dateKey!}
-                style={[styles.cell, cellStyle, !isEditable && styles.cellDisabled]}
-                onPress={() => handleDayPress(cell.dateKey)}
-                disabled={!isEditable}
-              >
-                <Text
-                  style={[
-                    styles.cellText,
-                    (status === 'success' || status === 'failed') &&
-                      styles.cellTextMarked,
-                    isToday && !status && styles.cellTextToday,
-                  ]}
-                >
-                  {cell.day}
-                </Text>
-              </Pressable>
-            );
-          })}
+                return (
+                  <Pressable
+                    key={cell.dateKey!}
+                    style={[
+                      styles.cell,
+                      cellStyle,
+                      !isEditable && styles.cellDisabled,
+                    ]}
+                    onPress={() => handleDayPress(cell.dateKey)}
+                    disabled={!isEditable}
+                  >
+                    <Text
+                      style={[
+                        styles.cellText,
+                        (status === 'success' || status === 'failed') &&
+                          styles.cellTextMarked,
+                        isToday && !status && styles.cellTextToday,
+                      ]}
+                    >
+                      {cell.day}
+                    </Text>
+                  </Pressable>
+                );
+              })}
+            </View>
+          ))}
         </View>
 
         <Text style={styles.tapHint}>Tap a day to mark success or failure</Text>
@@ -179,6 +214,7 @@ const styles = StyleSheet.create({
   },
   weekdayRow: {
     flexDirection: 'row',
+    gap: spacing.xs, // Matches the gap of the cells to ensure header alignment
     marginBottom: spacing.xs,
   },
   weekdayLabel: {
@@ -189,24 +225,28 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   calendar: {
+    // Removed row & wrap, it's now just a column container of rows
+  },
+  weekRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
+    gap: spacing.xs, // Horizontal gaps between cells
+    marginBottom: spacing.xs, // Vertical gap between rows
   },
   cell: {
-    width: '14.28%',
-    aspectRatio: 1,
+    flex: 1,
+    aspectRatio: 1, // Ensures perfect square
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: 10,
     borderWidth: 1,
-    marginBottom: spacing.xs,
   },
   cellEmpty: {
-    width: '14.28%',
+    flex: 1,
     aspectRatio: 1,
+    backgroundColor: 'transparent',
   },
   cellDisabled: {
-    opacity: 0.4,
+    opacity: 0.5,
   },
   cellText: {
     color: colors.textMuted,
