@@ -40,7 +40,7 @@ export async function updateSetting<K extends keyof AppSettings>(key: K, value: 
 
   // Step 3: Save the updated data back to AsyncStorage
   await saveAppData(data);
-
+  console.log(`Updated setting: ${key} = ${value}`); // Log the updated setting for debugging
   return data; // Return the updated data structure
 }
 
