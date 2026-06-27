@@ -13,8 +13,10 @@ export function getDaysInMonth(year: number, month: number): number {
   return new Date(year, month + 1, 0).getDate();
 }
 
-export function getMonthStartDayIndex(year: number, month: number): number {
-  return new Date(year, month, 1).getDay();
+export function getMonthStartDayIndex(year: number, month: number, firstDayOfWeek: 'sunday' | 'monday'): number {
+  const dayIndex = new Date(year, month, 1).getDay();
+  return firstDayOfWeek === 'monday' ? (dayIndex + 6) % 7 : dayIndex; 
 }
 
-export const WEEKDAY_LABELS = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+export const WEEKDAY_LABELS_SUN = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+export const WEEKDAY_LABELS_MON = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];

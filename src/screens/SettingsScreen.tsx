@@ -10,10 +10,17 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { colors, spacing } from '../constants/theme';
 import { useHabit } from '../context/HabitContext';
 import { formatIdentity, getHabitTypeLabel } from '../utils/stats';
+import { updateSetting } from '../storage/storage';
 
 export default function SettingsScreen() {
   const { data, clearHabit } = useHabit();
   const habit = data.activeHabit!;
+
+  const handleFirstDayOfWeekChange = () => {
+    const newFirstDayOfWeek = data.settings.firstDayOfWeek === 'sunday' ? 'monday' : 'sunday';
+    updateSetting('firstDayOfWeek', newFirstDayOfWeek);
+    console.log(`First day of week changed to: ${data.settings.firstDayOfWeek}`);
+  };
 
   const handleReset = () => {
     Alert.alert(
@@ -61,6 +68,13 @@ export default function SettingsScreen() {
             {Object.keys(habit.history).length}
           </Text>
         </View>
+
+        <Pressable style={styles.card} onPress={handleFirstDayOfWeekChange}>
+          <Text style={styles.cardLabel}>First Day of Week</Text>
+          <Text style={styles.cardValue}>
+            {data.settings.firstDayOfWeek === 'sunday' ? 'Sunday' : 'Monday'}
+          </Text>
+        </Pressable>
 
         <Pressable style={styles.resetButton} onPress={handleReset}>
           <Text style={styles.resetButtonText}>Reset / Change Habit</Text>
