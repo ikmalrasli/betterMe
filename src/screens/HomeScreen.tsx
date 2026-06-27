@@ -1,5 +1,5 @@
 import * as Haptics from 'expo-haptics';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Pressable,
   StyleSheet,
@@ -7,6 +7,7 @@ import {
   View,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import MaterialIcons from 'react-native-vector-icons/MaterialIcons';
 import { colors, spacing } from '../constants/theme';
 import { useHabit } from '../context/HabitContext';
 import { DayStatus } from '../types';
@@ -15,13 +16,15 @@ import {
   getDaysInMonth,
   getMonthStartDayIndex,
   todayKey,
-  WEEKDAY_LABELS,
+  WEEKDAY_LABELS_SUN,
+  WEEKDAY_LABELS_MON,
 } from '../utils/date';
 import {
   calculateCurrentStreak,
   calculateWinRate,
   formatIdentity,
 } from '../utils/stats';
+import { viewStorage, updateStartDate, updateSetting } from '../storage/storage';
 
 function getCellStyle(status: DayStatus | undefined, isToday: boolean) {
   if (status === 'success') {
@@ -45,17 +48,25 @@ export default function HomeScreen() {
 
   const now = new Date();
   const year = now.getFullYear();
-  const month = now.getMonth();
+  const [month, setMonth] = useState(now.getMonth());
   const today = todayKey();
 
-  const monthLabel = now.toLocaleString('default', {
+  const previousMonth = () => {
+    setMonth((prevMonth) => prevMonth - 1);
+  };
+
+  const nextMonth = () => {
+    setMonth((prevMonth) => prevMonth + 1);
+  };
+
+  const monthLabel = new Date(new Date().getFullYear(), month, 1).toLocaleString('default', {
     month: 'long',
     year: 'numeric',
   });
 
   const calendarCells = useMemo(() => {
     const daysInMonth = getDaysInMonth(year, month);
-    const startOffset = getMonthStartDayIndex(year, month);
+    const startOffset = getMonthStartDayIndex(year, month, data.settings.firstDayOfWeek);
     const cells: Array<{ day: number | null; dateKey: string | null }> = [];
 
     // Fill in the blank days at the start of the month to align the first day correctly
@@ -80,7 +91,9 @@ export default function HomeScreen() {
     }
 
     return cells;
-  }, [year, month]);
+  }, [year, month, data.settings.firstDayOfWeek]);
+
+  const WEEKDAY_LABELS = data.settings.firstDayOfWeek === 'sunday' ? WEEKDAY_LABELS_SUN : WEEKDAY_LABELS_MON;
 
   // Chunk our linear array (calendarCells) into arrays of 7 days (per week) for rendering
   const weeks = useMemo(() => {
@@ -100,6 +113,9 @@ export default function HomeScreen() {
   const handleDayPress = async (dateKey: string | null) => {
     if (!dateKey || !isEditableDay(dateKey)) return;
 
+    viewStorage();
+    updateStartDate('2026-06-13');
+
     const current = habit.history[dateKey];
     await toggleToday(dateKey);
 
@@ -114,7 +130,17 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <Text style={styles.identity}>{formatIdentity(habit.identity)}</Text>
           <Text style={styles.habitLabel}>{habit.name}</Text>
+
+        </View>
+
+        <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Pressable onPress={previousMonth}>
+            <MaterialIcons name="chevron-left" size={24} color={colors.textMuted} />
+          </Pressable>
           <Text style={styles.monthLabel}>{monthLabel}</Text>
+          <Pressable onPress={nextMonth}>
+            <MaterialIcons name="chevron-right" size={24} color={colors.textMuted} />
+          </Pressable>
         </View>
 
         <View style={styles.weekdayRow}>
@@ -158,7 +184,7 @@ export default function HomeScreen() {
                       style={[
                         styles.cellText,
                         (status === 'success' || status === 'failed') &&
-                          styles.cellTextMarked,
+                        styles.cellTextMarked,
                         isToday && !status && styles.cellTextToday,
                       ]}
                     >
@@ -217,6 +243,7 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
   },
   monthLabel: {
+    textAlign: 'center',
     color: colors.textMuted,
     fontSize: 15,
     textTransform: 'uppercase',
